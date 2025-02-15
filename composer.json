@@ -1,5 +1,11 @@
 {
     "require": {
         "htmlburger/carbon-fields": "^3.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "WPMB_Toolkit\\Includes\\": "includes/",
+            "WPMB_Toolkit\\Common\\": "common/"
+        }
     }
 }
