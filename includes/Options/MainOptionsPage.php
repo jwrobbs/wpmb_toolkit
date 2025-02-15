@@ -36,24 +36,33 @@ class MainOptionsPage {
 	 * Register settings.
 	 */
 	public static function register_settings() {
-		Container::make( 'theme_options', __( 'Theme Settings', 'playground' ) )
-		->set_page_menu_position( 4 )
-		->set_icon( 'dashicons-admin-settings' )
-		->add_tab(
-			__( 'Header', 'playground' ),
-			array( ... ),
-		)
-		->add_tab(
-			__( 'Contact', 'playground' ),
-			array( ... )
-		)
-		->add_tab(
-			__( 'Socials', 'playground' ),
-			array( ... )
-		)
-		->add_tab(
-			__( 'Footer', 'playground' ),
-			array( ... )
+		Container::make( 'theme_options', 'Theme Options' )
+		->set_page_file( 'theme-options123' )
+		->add_fields(
+			array(
+				Field::make( 'text', 'crb_facebook_url' )->set_width( 50 ),
+				Field::make( 'textarea', 'crb_footer_text' )->set_width( 50 ),
+			)
+		);
+
+		$menu_name = carbon_get_theme_option( 'menu_name' ) ?? 'WPMB Options';
+		Container::make( 'theme_options', $menu_name )
+		->set_page_file( 'wpmb-options' )
+		->add_fields(
+			array(
+				Field::make( 'text', 'menu_name', 'Menu Name' )
+				->set_width( 33 )
+				->set_default_value( 'WPMB Options' ),
+				Field::make( 'text', 'crb_facebook_url' )->set_width( 33 ),
+			)
+		);
+		Container::make( 'theme_options', 'Theme Options3' )
+		->set_page_parent( 'theme-options123' )
+		->add_fields(
+			array(
+				Field::make( 'text', 'crb_facebook_url' ),
+				Field::make( 'textarea', 'crb_footer_text' ),
+			)
 		);
 	}
 }
