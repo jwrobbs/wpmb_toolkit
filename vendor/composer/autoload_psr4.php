@@ -8,5 +8,4 @@ $baseDir = dirname($vendorDir);
 return array(
     'WPMB_Toolkit\\Includes\\' => array($baseDir . '/includes'),
     'WPMB_Toolkit\\Common\\' => array($baseDir . '/common'),
-    'Carbon_Fields\\' => array($vendorDir . '/htmlburger/carbon-fields/core'),
 );
