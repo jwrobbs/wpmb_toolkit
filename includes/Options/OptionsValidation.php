@@ -1,6 +1,6 @@
 <?php
 /**
- * MainOptionsPage class file.
+ * OptionsValidation trait file.
  *
  * @package WPMB_Toolkit
  */
@@ -10,9 +10,8 @@ namespace WPMB_Toolkit\Includes\Options;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * MainOptionsPage class.
+ * OptionsValidation trait.
  */
-class MainOptionsPage {
-
+trait OptionsValidation {
 
 }
