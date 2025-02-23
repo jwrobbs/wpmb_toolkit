@@ -10,6 +10,7 @@
 namespace WPMB_Toolkit\Common;
 
 use WPMB_Toolkit\Includes\Options\MainOptionsPage;
+use WPMB_Toolkit\Includes\Tools\Logger\Logger;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,6 +23,7 @@ class Hooks {
 	 * Register hooks.
 	 */
 	public static function register() {
+		Logger::init();
 		MainOptionsPage::register();
 	}
 }
