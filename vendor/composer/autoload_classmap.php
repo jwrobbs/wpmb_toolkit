@@ -8,9 +8,11 @@ $baseDir = dirname($vendorDir);
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'WPMB_Toolkit\\Common\\Constants' => $baseDir . '/common/Constants.php',
+    'WPMB_Toolkit\\Common\\Helpers' => $baseDir . '/common/Helpers.php',
     'WPMB_Toolkit\\Common\\Hooks' => $baseDir . '/common/Hooks.php',
     'WPMB_Toolkit\\Includes\\Options\\MainOptionsPage' => $baseDir . '/includes/Options/MainOptionsPage.php',
     'WPMB_Toolkit\\Includes\\Options\\OptionsValidation' => $baseDir . '/includes/Options/OptionsValidation.php',
     'WPMB_Toolkit\\Includes\\Tools\\Logger\\Logger' => $baseDir . '/includes/Tools/Logger/Logger.php',
+    'WPMB_Toolkit\\Includes\\Tools\\Logger\\LoggerTrait' => $baseDir . '/includes/Tools/Logger/LoggerTrait.php',
     'WPMB_Toolkit\\Includes\\Tools\\ToolsManager' => $baseDir . '/includes/Tools/ToolsManager.php',
 );

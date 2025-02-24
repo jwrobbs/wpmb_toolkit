@@ -13,9 +13,9 @@ if ( ! function_exists( 'write_wpmb_log' ) ) {
 	/**
 	 * Get the logger instance.
 	 *
-	 * @return \WPMB_Toolkit\Includes\Tools\Logger\Logger
+	 * @param mixed ...$args Arguments to pass to the logger.
 	 */
-	function write_wpmb_log() {
-		return \WPMB_Toolkit\Includes\Tools\Logger\Logger::get_instance();
+	function write_wpmb_log( ...$args ) {
+		\WPMB_Toolkit\Includes\Tools\Logger\Logger::log_it( ...$args );
 	}
 }

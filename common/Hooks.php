@@ -11,6 +11,7 @@ namespace WPMB_Toolkit\Common;
 
 use WPMB_Toolkit\Includes\Options\MainOptionsPage;
 use WPMB_Toolkit\Includes\Tools\Logger\Logger;
+use WPMB_Toolkit\Includes\Tools\ToolsManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,6 +25,7 @@ class Hooks {
 	 */
 	public static function register() {
 		Logger::init();
-		MainOptionsPage::register();
+		ToolsManager::init();
+		// MainOptionsPage::register();
 	}
 }

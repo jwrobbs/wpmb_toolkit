@@ -7,6 +7,8 @@
 
 namespace WPMB_Toolkit\Includes\Tools\Logger;
 
+use WPMB_Toolkit\Common\Helpers;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,6 +22,7 @@ defined( 'ABSPATH' ) || exit;
  *  log()
  */
 class Logger {
+	use LoggerTrait;
 
 	/**
 	 * The log's file path.
@@ -30,101 +33,103 @@ class Logger {
 	protected $file_path;
 
 	/**
+	 * Instance.
+	 *
+	 * @var Logger
+	 */
+	protected static $instance = null;
+
+	/**
 	 * Initialize the logger.
+	 *
+	 * Just loads the helper functions. The rest is handled by the constructor.
 	 */
 	public static function init() {
 		require_once __DIR__ . '/helper.php';
 	}
 
 	/**
-	 * Get the logger instance.
+	 * Constructor.
 	 *
-	 * @param mixed ...$args The arguments to pass to the logger.
-	 * @return \WPMB_Toolkit\Includes\Tools\Logger\Logger
+	 * @return void
 	 */
-	public static function get_instance( ...$args ) {
-		return new self( ...$args );
+	protected function __construct() {
+		$this->file_path = WP_CONTENT_DIR . '/wpmb-toolkit.log';
 	}
 
 	/**
-	 * Constructor.
+	 * Log it.
+	 *
+	 * This is the primary public method that drives this system.
 	 *
 	 * @param string $message The message to log.
 	 * @param array  $context The context to log. Array of key => value pairs.
 	 * @param string $level The level to log.
-	 *
 	 * @return void
 	 */
-	public function __construct(
-		protected string $message,
-		protected array $context = array(),
-		protected string $level = 'info',
-	) {
-		$this->verify_level();
+	public static function log_it( $message, $context, $level ) {
+
+		$level   = self::verify_level( $level );
+		$context = self::verify_context( $context );
+
+		// If SimpleHistory is available, use it and return.
 		if ( function_exists( 'SimpleHistory' ) ) {
-			\SimpleHistory()->$this->level( $this->message, $this->context );
+			\SimpleHistory()->$level( $message, $context );
+			return;
 		}
 
-		$this->file_path = WP_CONTENT_DIR . '/wpmb-toolkit.log';
-		$this->write_to_log();
+		$logger = self::get_instance();
+		$logger->write_to_log( $message, $context, $level );
 	}
 
 	/**
-	 * Verify the level.
+	 * Get the logger instance.
 	 *
-	 * Ensures the level is allowed by SimpleHistory.
-	 *
-	 * @return void
+	 * @return \WPMB_Toolkit\Includes\Tools\Logger\Logger
 	 */
-	protected function verify_level() {
-		$allowed_levels = array(
-			'info',
-			'notice',
-			'warning',
-			'error',
-			'critical',
-			'alert',
-			'emergency',
-			'debug',
-		);
-		if ( ! in_array( $this->level, $allowed_levels, true ) ) {
-			$this->level = 'info';
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
 		}
+		return self::$instance;
 	}
 
 	/**
 	 * Write to the log.
 	 *
+	 * At this point, $level has been verified. $context is an array.
+	 *
+	 * @param string $message The message to log.
+	 * @param array  $context The context to log. Array of key => value pairs.
+	 * @param string $level The level to log.
 	 * @return void
 	 */
-	protected function write_to_log() {
+	protected function write_to_log( $message, $context, $level ) {
 
-		global $wp_filesystem;
-
-		if ( ! function_exists( 'WP_Filesystem' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
+		// Convert context to json.
+		if ( empty( $context ) ) {
+			$context_json = '';
+		} else {
+			$context_json = "\n" . \wp_json_encode( $context );
 		}
-
-		WP_Filesystem();
 
 		$datetime = gmdate( 'Y-m-d H:i:s' );
 
-		$context = \wp_json_encode( $this->context ) ?? '';
-		if ( ! empty( $context ) ) {
-			$context = '\n' . $context;
-		}
-
-		$log_message = <<<LOG
-			{$datetime} [{$this->level}] {$this->message}{$context}
+		$message_to_log = <<<LOG
+			{$datetime} [{$level}] {$message}{$context_json}
 		LOG;
 
-		// Check if the file exists, if not create it.
-		if ( ! $wp_filesystem->exists( $this->file_path ) ) {
-			$wp_filesystem->put_contents( $this->file_path, '', FS_CHMOD_FILE );
-		}
+		self::prepare_log_file();
+
+		$wp_filesystem = Helpers::init_filesystem();
 
 		// Append the log message to the file.
+
 		$existing_content = $wp_filesystem->get_contents( $this->file_path );
-		$wp_filesystem->put_contents( $this->file_path, $existing_content . $log_message . PHP_EOL, FS_CHMOD_FILE );
+		$wp_filesystem->put_contents(
+			$this->file_path,
+			$existing_content . $message_to_log . PHP_EOL,
+			FS_CHMOD_FILE
+		);
 	}
 }
