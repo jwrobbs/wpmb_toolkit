@@ -77,6 +77,7 @@ class Logger {
 			\SimpleHistory()->$level( $message, $context );
 			return;
 		}
+		// ?? what other systems are available? QM?
 
 		$logger = self::get_instance();
 		$logger->write_to_log( $message, $context, $level );
