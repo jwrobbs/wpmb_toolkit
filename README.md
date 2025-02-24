@@ -4,6 +4,11 @@
 
 An extensible toolkit for WordPress devs and webmasters.
 
+## Status
+
+1. The logger is ready for testing.
+2. ToolLoader - started.
+
 ## Problem solved
 
 I often have a million little unrelated tweaks I want to make to a website.
@@ -20,8 +25,12 @@ I'm a proud member of team "dump them in 1 plugin". The toolkit is being build t
 - Requirements system
 - Shared, streamline options page generator built on Custom Fields
 
+## Tools
+
+There are 2 types of tools.
+
+The only exception is the logging function. Logging is an essential part of my development process, so I've fully integrated a basic logger outside the tool system. It will be improved to support additional integration or optional deactivation.
+
 ## Testing
 
 There are currently no tests.
-
-But there are stubs for Carbon Fields. It uses dynamic methods and VS Code can't handle that. Add the stubs folder to your Intelephense folder and you'll be off to the races.
