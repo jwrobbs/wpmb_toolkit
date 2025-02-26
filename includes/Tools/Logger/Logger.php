@@ -25,14 +25,6 @@ class Logger {
 	use LoggerTrait;
 
 	/**
-	 * The log's file path.
-	 * Should this be public?
-	 *
-	 * @var string
-	 */
-	protected $file_path;
-
-	/**
 	 * Instance.
 	 *
 	 * @var Logger
@@ -54,7 +46,6 @@ class Logger {
 	 * @return void
 	 */
 	protected function __construct() {
-		$this->file_path = WP_CONTENT_DIR . '/wpmb-toolkit.log';
 	}
 
 	/**
@@ -67,7 +58,11 @@ class Logger {
 	 * @param string $level The level to log.
 	 * @return void
 	 */
-	public static function log_it( $message, $context, $level ) {
+	public static function log_it(
+		$message,
+		$context = array(),
+		$level = 'info'
+	) {
 
 		$level   = self::verify_level( $level );
 		$context = self::verify_context( $context );
@@ -117,7 +112,7 @@ class Logger {
 		$datetime = gmdate( 'Y-m-d H:i:s' );
 
 		$message_to_log = <<<LOG
-			{$datetime} [{$level}] {$message}{$context_json}
+		{$datetime} [{$level}] {$message}{$context_json}
 		LOG;
 
 		self::prepare_log_file();
@@ -126,9 +121,11 @@ class Logger {
 
 		// Append the log message to the file.
 
-		$existing_content = $wp_filesystem->get_contents( $this->file_path );
+		$file_path = self::get_log_file_path();
+
+		$existing_content = $wp_filesystem->get_contents( $file_path );
 		$wp_filesystem->put_contents(
-			$this->file_path,
+			$file_path,
 			$existing_content . $message_to_log . PHP_EOL,
 			FS_CHMOD_FILE
 		);

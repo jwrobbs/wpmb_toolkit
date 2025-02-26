@@ -24,7 +24,7 @@ trait LoggerTrait {
 	 * @param string $level The level to verify.
 	 * @return string
 	 */
-	protected function verify_level( string $level = 'info' ) {
+	protected static function verify_level( string $level = 'info' ) {
 		$allowed_levels = array(
 			'info',
 			'notice',
@@ -35,7 +35,7 @@ trait LoggerTrait {
 			'emergency',
 			'debug',
 		);
-		if ( ! in_array( $this->level, $allowed_levels, true ) ) {
+		if ( ! in_array( $level, $allowed_levels, true ) ) {
 			$level = 'info';
 		}
 		return $level;
@@ -50,7 +50,7 @@ trait LoggerTrait {
 	 * @param mixed $context The context to verify.
 	 * @return array
 	 */
-	protected function verify_context( $context ) {
+	protected static function verify_context( $context ) {
 		if ( is_object( $context ) ) {
 			$context = (array) $context;
 		} elseif ( \is_string( $context ) ) {
@@ -71,7 +71,7 @@ trait LoggerTrait {
 	protected function prepare_log_file() {
 		$wp_filesystem = Helpers::init_filesystem();
 
-		$log_file = $this->get_log_file_path();
+		$log_file = self::get_log_file_path();
 
 		if ( ! $wp_filesystem->exists( $log_file ) ) {
 			error_log( 'Log file does not exist. Creating it.' ); //phpcs:ignore
@@ -82,5 +82,14 @@ trait LoggerTrait {
 			error_log( 'Log file is not writable. Changing permissions.' ); // phpcs:ignore
 			$wp_filesystem->chmod( $log_file, FS_CHMOD_FILE );
 		}
+	}
+
+	/**
+	 * Get the log file path.
+	 *
+	 * @return string
+	 */
+	protected static function get_log_file_path() {
+		return WP_CONTENT_DIR . '/wpmb-toolkit.log';
 	}
 }
