@@ -5,7 +5,7 @@
  * @package WPMB_Toolkit
  */
 
-namespace WPMB_Toolkit\Includes\Tools\Logger;
+namespace WPMB_Toolkit\common\Logger;
 
 use WPMB_Toolkit\Common\Helpers;
 

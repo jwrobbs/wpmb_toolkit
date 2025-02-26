@@ -16,6 +16,6 @@ if ( ! function_exists( 'write_wpmb_log' ) ) {
 	 * @param mixed ...$args Arguments to pass to the logger.
 	 */
 	function write_wpmb_log( ...$args ) {
-		\WPMB_Toolkit\Includes\Tools\Logger\Logger::log_it( ...$args );
+		\WPMB_Toolkit\common\Logger\Logger::log_it( ...$args );
 	}
 }

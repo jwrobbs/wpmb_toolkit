@@ -5,7 +5,7 @@
  * @package WPMB_Toolkit
  */
 
-namespace WPMB_Toolkit\Includes\Tools\Logger;
+namespace WPMB_Toolkit\common\Logger;
 
 use WPMB_Toolkit\Common\Helpers;
 
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * Will act as a SimpleLogger wrapper if it's available.
  *
  * Usage:
- *  use WPMB_Toolkit\Includes\Tools\Logger\Logger;
+ *  use WPMB_Toolkit\common\Logger\Logger;
  *  log()
  */
 class Logger {
