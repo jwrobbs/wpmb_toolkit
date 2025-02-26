@@ -106,7 +106,7 @@ class Logger {
 		if ( empty( $context ) ) {
 			$context_json = '';
 		} else {
-			$context_json = "\n" . \wp_json_encode( $context );
+			$context_json = "\n" . \wp_json_encode( $context, JSON_PRETTY_PRINT );
 		}
 
 		$datetime = gmdate( 'Y-m-d H:i:s' );
