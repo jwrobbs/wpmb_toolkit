@@ -60,11 +60,11 @@ class WPMBToolkit {
 		}
 		self::$is_init = true;
 
-		require_once __DIR__ . '/vendor/autoload.php';
-		Hooks::register();
-
 		self::$path = plugin_dir_path( __FILE__ );
 		self::$url  = plugin_dir_url( __FILE__ );
+
+		require_once __DIR__ . '/vendor/autoload.php';
+		Hooks::register();
 	}
 
 	/**
