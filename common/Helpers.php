@@ -28,4 +28,20 @@ class Helpers {
 
 		return $wp_filesystem;
 	}
+
+	/**
+	 * Dump it.
+	 *
+	 * @param mixed $data Data to dump.
+	 * @param bool  $suicide Whether to die or not.
+	 */
+	public static function dumpit( $data, $suicide = false ) {
+		echo '<pre>';
+		var_dump( $data ); // phpcs:ignore
+		echo '</pre>';
+
+		if ( $suicide ) {
+			die();
+		}
+	}
 }
