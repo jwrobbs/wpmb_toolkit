@@ -7,7 +7,6 @@
 
 namespace WPMB_Toolkit\Includes\Tools;
 
-use WPMB_Toolkit\Common\Helpers;
 use WPMB_Toolkit\WPMBToolkit;
 
 defined( 'ABSPATH' ) || exit;
@@ -196,15 +195,13 @@ class ToolsManager {
 				$config_data['version'],
 				$status,
 				$config_data['description'] ?? '',
+				$config_data['link'] ?? 'no data',
 				$active,
 				$is_built_in
 			);
 
-			// die();
 			// Add Tool object to manifest.
 			self::$manifest[ $config_data['key'] ] = $tool;
-
-			// Helpers::dumpit( $tool );
 
 			// Load the tool.
 			if ( $tool->active

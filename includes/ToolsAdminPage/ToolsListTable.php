@@ -52,25 +52,25 @@ class ToolsListTable extends \WP_List_Table {
 		return array(
 			'name'   => array( 'name', false ),
 			'origin' => array( 'is_built_in', false ),
+			'status' => array( 'status', false ),
 		);
 	}
-
 
 	/**
 	 * Fetch data for the table
 	 */
-	private function get_tools_data() {
+	protected function get_tools_data() {
 		$tools = ToolsManager::get_manifest();
 
-		if ( isset( $_POST['origin_filter'] ) ) { // phpcs:ignore
-			$selected_origin = sanitize_text_field( wp_unslash( $_POST['origin_filter'] ) ); // phpcs:ignore
-		}
+		$selected_origin = isset( $_GET['origin_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['origin_filter'] ) ) : ''; // phpcs:ignore
+		$selected_status = isset( $_GET['status_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['status_filter'] ) ) : ''; // phpcs:ignore
 
 		$data = array();
 		foreach ( $tools as $tool_id => $tool ) {
 			$is_built_in = ! empty( $tool->is_built_in );
+			$status      = $tool->status ?? 'Inactive'; // Default status to "Inactive" if not set.
 
-			// Apply filter correctly.
+			// Apply Origin filter.
 			if ( 'built-in' === $selected_origin && ! $is_built_in ) {
 				continue;
 			}
@@ -78,20 +78,25 @@ class ToolsListTable extends \WP_List_Table {
 				continue;
 			}
 
+			// Apply Status filter.
+			if ( 'Active' === $selected_status && 'Active' !== $status ) {
+				continue;
+			}
+			if ( 'Inactive' === $selected_status && 'Inactive' !== $status ) {
+				continue;
+			}
+
 			$data[] = array(
 				'ID'          => $tool_id,
 				'name'        => $tool->name,
-				'status'      => $tool->status ?? false,
+				'status'      => $status,
 				'is_built_in' => $is_built_in,
+				'link'        => $tool->link,
 			);
 		}
 
 		return $data;
 	}
-
-
-
-
 
 	/**
 	 * Prepare items for display
@@ -102,16 +107,26 @@ class ToolsListTable extends \WP_List_Table {
 		$sortable              = $this->get_sortable_columns();
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
-		$data = $this->get_tools_data(); // Now correctly filtered!
+		$data = $this->get_tools_data(); // Fetch filtered data.
 
 		// Sorting logic.
 		// @codingStandardsIgnoreStart
-		$orderby = sanitize_text_field( wp_unslash( $_POST['orderby'] ) ) ?? 'name';
-		$order   = sanitize_text_field( wp_unslash( $_POST['order'] ) ) ?? 'asc';
+		$orderby = $_GET['orderby'] ?? 'name';
+		$order   = $_GET['order'] ?? 'asc';
 		// @codingStandardsIgnoreEnd
+
+		$orderby = sanitize_text_field( wp_unslash( $orderby ) );
+		$order   = sanitize_text_field( wp_unslash( $order ) );
+
 		usort(
 			$data,
 			function ( $a, $b ) use ( $orderby, $order ) {
+				if ( 'status' === $orderby ) {
+					return ( 'asc' === $order )
+						? strcmp( (string) $a['status'], (string) $b['status'] )
+						: strcmp( (string) $b['status'], (string) $a['status'] );
+				}
+
 				$result = strcmp( (string) $a[ $orderby ], (string) $b[ $orderby ] );
 				return ( 'asc' === $order ) ? $result : -$result;
 			}
@@ -119,8 +134,6 @@ class ToolsListTable extends \WP_List_Table {
 
 		$this->items = $data;
 	}
-
-
 
 	/**
 	 * Checkbox column for bulk actions
@@ -155,12 +168,28 @@ class ToolsListTable extends \WP_List_Table {
 	}
 
 	/**
-	 * Define row actions
+	 * Define row actions.
 	 *
 	 * @param array $item The item data.
 	 * @return string
 	 */
-	private function get_row_actions( $item ) {
+	protected function get_row_actions( $item ) {
+		$actions = array();
+
+		// More Info link if `link` property exists.
+		if ( ! empty( $item['link'] ) ) {
+			$actions['more_info'] = sprintf(
+				'<a href="%s" target="_blank">%s</a>',
+				esc_url( $item['link'] ),
+				__( 'More Info', 'wpmb-toolkit' )
+			);
+		}
+
+		// Skip other actions if the tool is built-in.
+		if ( ! empty( $item['is_built_in'] ) ) {
+			return $this->row_actions( $actions );
+		}
+
 		$activate_url   = add_query_arg(
 			array(
 				'action' => 'activate',
@@ -180,16 +209,16 @@ class ToolsListTable extends \WP_List_Table {
 			)
 		);
 
-		$actions = array();
 		if ( 'Inactive' === $item['status'] ) {
 			$actions['activate'] = sprintf( '<a href="%s">%s</a>', esc_url( $activate_url ), __( 'Activate', 'wpmb-toolkit' ) );
 		} else {
-			$actions['deactivate'] = sprintf( '<a href="%s">%s</a>', esc_url( $deactivate_url ), __( 'Deactivate', 'wpmb-toolkit' ) );
+			$actions['deactivate'] = sprintf( '<a href="%s" target="_blank">%s</a>', esc_url( $deactivate_url ), __( 'Deactivate', 'wpmb-toolkit' ) );
 		}
 		$actions['delete'] = sprintf( '<a href="%s" style="color:red;">%s</a>', esc_url( $delete_url ), __( 'Delete', 'wpmb-toolkit' ) );
 
 		return $this->row_actions( $actions );
 	}
+
 
 	/**
 	 * Bulk actions
@@ -212,21 +241,49 @@ class ToolsListTable extends \WP_List_Table {
 			return;
 		}
 
-		$selected = $_POST['origin_filter'] ?? ''; // phpcs:ignore
+    $selected_origin = esc_attr( wp_unslash( $_GET['origin_filter'] ?? '' ) ); // phpcs:ignore
+    $selected_status = esc_attr( wp_unslash( $_GET['status_filter'] ?? '' ) ); // phpcs:ignore
 
-		echo '<form method="POST" action="">';
-		echo '<input type="hidden" name="page" value="' . esc_attr( wp_unslash( $_POST['page'] ) ?? '' ) . '">'; // phpcs:ignore
-		echo '<input type="hidden" name="origin_filter" value="' . esc_attr( $selected ) . '">';
+		echo '<form method="GET" action="">';
+		echo '<input type="hidden" name="page" value="' . esc_attr( wp_unslash( $_GET['page'] ?? '' ) ) . '">'; // phpcs:ignore
 
+		// Origin filter dropdown.
 		echo '<label for="filter-by-origin" class="screen-reader-text">' . esc_html__( 'Filter by Origin', 'wpmb-toolkit' ) . '</label>';
 		echo '<select name="origin_filter" id="filter-by-origin">';
-		echo '<option value="" ' . selected( $selected, '', false ) . '>' . esc_html__( 'All Origins', 'wpmb-toolkit' ) . '</option>';
-		echo '<option value="built-in" ' . selected( $selected, 'built-in', false ) . '>' . esc_html__( 'Built-in', 'wpmb-toolkit' ) . '</option>';
-		echo '<option value="user" ' . selected( $selected, 'user', false ) . '>' . esc_html__( 'User', 'wpmb-toolkit' ) . '</option>';
+		echo '<option value="" ' . selected( $selected_origin, '', false ) . '>' . esc_html__( 'All Origins', 'wpmb-toolkit' ) . '</option>';
+		echo '<option value="built-in" ' . selected( $selected_origin, 'built-in', false ) . '>' . esc_html__( 'Built-in', 'wpmb-toolkit' ) . '</option>';
+		echo '<option value="user" ' . selected( $selected_origin, 'user', false ) . '>' . esc_html__( 'User', 'wpmb-toolkit' ) . '</option>';
+		echo '</select>';
+
+		// Status filter dropdown.
+		echo '<label for="filter-by-status" class="screen-reader-text">' . esc_html__( 'Filter by Status', 'wpmb-toolkit' ) . '</label>';
+		echo '<select name="status_filter" id="filter-by-status">';
+		echo '<option value="" ' . selected( $selected_status, '', false ) . '>' . esc_html__( 'All Statuses', 'wpmb-toolkit' ) . '</option>';
+		echo '<option value="Active" ' . selected( $selected_status, 'Active', false ) . '>' . esc_html__( 'Active', 'wpmb-toolkit' ) . '</option>';
+		echo '<option value="Inactive" ' . selected( $selected_status, 'Inactive', false ) . '>' . esc_html__( 'Inactive', 'wpmb-toolkit' ) . '</option>';
 		echo '</select>';
 
 		submit_button( __( 'Filter', 'wpmb-toolkit' ), '', 'filter_action', false );
 
+		// Reset button.
+		$reset_url = admin_url( 'admin.php?page=' . esc_attr( wp_unslash( $_GET['page'] ?? 'wpmb-tools' ) ) ); // phpcs:ignore
+		echo '<a href="' . esc_url( $reset_url ) . '" class="button">' . esc_html__( 'Reset', 'wpmb-toolkit' ) . '</a>';
+
 		echo '</form>';
+
+		// JavaScript to update URL parameters on dropdown change.
+		echo '<script>
+    document.getElementById("filter-by-origin").addEventListener("change", function() {
+        let url = new URL(window.location.href);
+        url.searchParams.set("origin_filter", this.value);
+        window.location.href = url.toString();
+    });
+
+    document.getElementById("filter-by-status").addEventListener("change", function() {
+        let url = new URL(window.location.href);
+        url.searchParams.set("status_filter", this.value);
+        window.location.href = url.toString();
+    });
+    </script>';
 	}
 }

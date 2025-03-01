@@ -23,6 +23,7 @@ class Tool {
 		 * @param string $version The version of the tool.
 		 * @param string $status The status of the tool.
 		 * @param string $description The description of the tool.
+		 * @param string $link The link to the tool's page.
 		 * @param bool   $active Whether the tool is active or not.
 		 * @param bool   $is_built_in Whether the tool is built-in or not.
 		 *
@@ -35,6 +36,7 @@ class Tool {
 		public string $version,
 		public string $status,
 		public ?string $description,
+		public ?string $link,
 		public bool $active = false,
 		public bool $is_built_in = false,
 	) {
@@ -44,6 +46,7 @@ class Tool {
 		$this->version     = $version;
 		$this->status      = $status;
 		$this->description = $description ?? '';
+		$this->link        = $link ?? '';
 		$this->is_built_in = $is_built_in;
 
 		if ( ! in_array( $status, array( 'Active', 'Inactive' ), true ) ) {

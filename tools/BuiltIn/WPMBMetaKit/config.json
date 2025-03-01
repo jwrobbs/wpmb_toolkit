@@ -1,7 +1,8 @@
 {
-  "name": "WPMB MetaKit",
-  "key": "wpmb_metakit",
-  "version": "0.1",
-  "description": "A place-holder tool for dev purposes.",
-  "dependencies": []
+	"name": "WPMB MetaKit",
+	"key": "wpmb_metakit",
+	"version": "0.1",
+	"description": "A place-holder tool for dev purposes.",
+	"dependencies": [],
+	"link": "testlink.com"
 }

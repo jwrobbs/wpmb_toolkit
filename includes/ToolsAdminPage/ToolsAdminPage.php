@@ -46,6 +46,7 @@ class ToolsAdminPage {
 	 * @return void
 	 */
 	public static function render_page() {
+
 		$tools_table = new ToolsListTable();
 		$tools_table->prepare_items();
 		?>

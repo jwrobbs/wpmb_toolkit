@@ -20,7 +20,6 @@ use WPMB_Toolkit\Includes\Tools\ToolsManager;
 
 defined( 'ABSPATH' ) || exit;
 
-
 /**
  * Class WPMBToolkit.
  */
