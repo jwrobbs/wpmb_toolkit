@@ -15,6 +15,8 @@
 namespace WPMB_Toolkit;
 
 use WPMB_Toolkit\Common\Hooks;
+use WPMB_Toolkit\Common\Logger\Logger;
+use WPMB_Toolkit\Includes\Tools\ToolsManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -65,6 +67,9 @@ class WPMBToolkit {
 
 		require_once __DIR__ . '/vendor/autoload.php';
 		Hooks::register();
+
+		Logger::init();
+		ToolsManager::init();
 	}
 
 	/**

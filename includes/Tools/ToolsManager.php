@@ -7,6 +7,7 @@
 
 namespace WPMB_Toolkit\Includes\Tools;
 
+use WPMB_Toolkit\Common\Helpers;
 use WPMB_Toolkit\WPMBToolkit;
 
 defined( 'ABSPATH' ) || exit;
@@ -23,36 +24,56 @@ defined( 'ABSPATH' ) || exit;
  * - Analyzing tool dependencies.
  */
 class ToolsManager {
+
 	/**
-	 * Stores detected tools and their metadata.
+	 * Is init.
+	 *
+	 * @var bool
+	 */
+	protected static $is_init = false;
+
+	/**
+	 * Manifest.
+	 *
+	 * Contains array of all Tool objects.
 	 *
 	 * @var array
 	 */
-	protected static $tools = array();
+	protected static $manifest = array();
 
 	/**
-	 * Directory where user tools are stored.
+	 * Activated Tools.
+	 *
+	 * If the Tool's key is in this array, it is activated.
+	 *
+	 * @var array
+	 */
+	protected static $activated_tools = array();
+
+	/**
+	 * Main tools directory.
 	 *
 	 * @var string
 	 */
-	protected static $main_tools_directory;
+	protected static $main_tools_directory = '';
 
 	/**
-	 * WP_Filesystem Instance.
+	 * Tool dirs.
 	 *
-	 * @var WP_Filesystem_Base
+	 * Array of arrays of tool directory strings.
+	 *
+	 * @var array
 	 */
-	protected static $filesystem;
+	protected static $tool_dirs = array();
 
 	/**
 	 * Initialize tool detection and loading.
 	 *
 	 * 1. Initialize props.
-	 * 2. Scan the builtin tools directory.
-	 * 3. Activate the builtin tools.
-	 * 4. Scan the user tools directory.
-	 * 5. Check the tool activations.
-	 * 6. Load the active tools as appropriate.
+	 * 2. Load activations.
+	 * 3. Scan the tools directory.
+	 * 4. Load and activate the built-in tools.
+	 * 5. Load and activate the user tools.
 	 *
 	 * CoPilot spitballing.
 	 * 7. Check for tool upgrades.
@@ -64,22 +85,36 @@ class ToolsManager {
 	 * 13. Check for tool activations.
 	 */
 	public static function init() {
-
+		if ( self::$is_init ) {
+			return;
+		}
+		self::$is_init              = true; // 1.
 		self::$main_tools_directory = WPMBToolkit::get_path() . 'tools/';
-		self::detect_tools();
 
-		self::load_built_in_tools( self::$tools['BuiltIn'] );
-		self::load_user_tools( self::$tools['user'] );
+		self::load_activations(); // 2.
+		self::detect_tools(); // 3.
+
+		self::load_tools( self::$tool_dirs['BuiltIn'], true ); // 4.
+		self::load_tools( self::$tool_dirs['user'] ); // 5.
+	}
+
+	/**
+	 * Load activations.
+	 */
+	protected static function load_activations() {
+		self::$activated_tools = \get_option( 'wpmb_toolkit_activations', array() );
 	}
 
 	/**
 	 * Scan the user tools directory and detect available tools.
+	 * Creates list of paths.
 	 */
 	public static function detect_tools() {
 		if ( ! is_dir( self::$main_tools_directory ) ) {
 			\write_wpmb_log(
 				'Tools directory does not exist',
-				array( 'directory' => self::$main_tools_directory )
+				array( 'directory' => self::$main_tools_directory ),
+				'error'
 			);
 			return false;
 		}
@@ -108,23 +143,76 @@ class ToolsManager {
 				}
 			}
 		}
-		self::$tools['BuiltIn'] = $tool_dirs['BuiltIn'];
-		self::$tools['user']    = $tool_dirs['user'];
+		self::$tool_dirs['BuiltIn'] = $tool_dirs['BuiltIn'];
+		self::$tool_dirs['user']    = $tool_dirs['user'];
+	}
 
-		// if ( is_dir( $tool_path ) && file_exists( $config_file ) ) {
-		// $config_data = json_decode( file_get_contents( $config_file ), true );
+	/**
+	 * Load tools.
+	 *
+	 * @param array $tools_dir Array of tools.
+	 * @param bool  $is_built_in Whether the tools are built-in or user tools.
+	 */
+	public static function load_tools( array $tools_dir, bool $is_built_in = false ) {
+		foreach ( $tools_dir as $tool_dir ) {
 
-		// if ( self::validate_config( $config_data ) ) {
-		// self::$tools[ $config_data['key'] ] = array(
-		// 'name'         => $config_data['name'],
-		// 'key'          => $config_data['key'],
-		// 'version'      => $config_data['version'],
-		// 'description'  => $config_data['description'] ?? '',
-		// 'dependencies' => $config_data['dependencies'] ?? array(),
-		// );
-		// }
-		// }
-		// }
+			// Get and verify config.json.
+			$config_file = $tool_dir . '/config.json';
+			if ( ! file_exists( $config_file ) ) {
+				// add log/error.
+				continue;
+			}
+
+			$config_data = json_decode( file_get_contents( $config_file ), true ); // phpcs:ignore
+			if ( ! self::validate_config( $config_data ) ) {
+				\write_wpmb_log(
+					'Invalid config.json',
+					array(
+						'path' => $tool_dir,
+						'file' => $config_file,
+					),
+					'error'
+				);
+				continue;
+			}
+
+			// Fine-tune data and create Tool object.
+
+			if (
+				in_array( $config_data['key'], self::$activated_tools, true )
+				|| $is_built_in
+			) {
+				$status = 'Active';
+				$active = true;
+			} else {
+				$status = 'Inactive';
+				$active = false;
+			}
+
+			$tool = new Tool(
+				$config_data['name'],
+				$config_data['key'],
+				$tool_dir,
+				$config_data['version'],
+				$status,
+				$config_data['description'] ?? '',
+				$active,
+				$is_built_in
+			);
+
+			// die();
+			// Add Tool object to manifest.
+			self::$manifest[ $config_data['key'] ] = $tool;
+
+			// Helpers::dumpit( $tool );
+
+			// Load the tool.
+			if ( $tool->active
+				|| 'Active' === $status
+			) {
+				require_once $tool->path . '/index.php';
+			}
+		}
 	}
 
 	/**
@@ -149,19 +237,11 @@ class ToolsManager {
 					array(
 						'path' => $tool_dir,
 						'file' => $config_file,
-					)
+					),
+					'error'
 				);
 				continue;
 			}
-
-			\write_wpmb_log(
-				'Loaded built-in tool',
-				array(
-					'name'    => $config_data['name'],
-					'key'     => $config_data['key'],
-					'version' => $config_data['version'],
-				)
-			);
 		}
 	}
 
@@ -219,12 +299,11 @@ class ToolsManager {
 	}
 
 	/**
-	 * Get the list of detected tools.
-	 * ?? is this in use?
+	 * Get the manifest.
 	 *
 	 * @return array
 	 */
-	public static function get_tools(): array {
-		return self::$tools;
+	public static function get_manifest() {
+		return self::$manifest;
 	}
 }

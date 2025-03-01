@@ -35,7 +35,7 @@ class ToolsAdminPage {
 			'manage_options',
 			'wpmb-tools',
 			array( __CLASS__, 'render_page' ),
-			'dashicons-admin-generic',
+			'dashicons-hammer',
 			65
 		);
 	}
@@ -46,13 +46,17 @@ class ToolsAdminPage {
 	 * @return void
 	 */
 	public static function render_page() {
-		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'WPMB Tools', 'wpmb' ) . '</h1>';
-		echo '<form method="post">';
-		$tools_table = new Tools_List_Table();
+		$tools_table = new ToolsListTable();
 		$tools_table->prepare_items();
-		$tools_table->display();
-		echo '</form>';
-		echo '</div>';
+		?>
+		<div class="wrap">
+			<h1 class="wp-heading-inline"><?php esc_html_e( 'Manage Tools', 'wpmb-toolkit' ); ?></h1>
+			<form method="post">
+				<?php
+				$tools_table->display();
+				?>
+			</form>
+		</div>
+		<?php
 	}
 }

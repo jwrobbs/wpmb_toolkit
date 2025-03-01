@@ -30,10 +30,14 @@ class ComposerStaticInit24e41bbaee1332276f826502c7093d78
         'WPMB_Toolkit\\Common\\Constants' => __DIR__ . '/../..' . '/common/Constants.php',
         'WPMB_Toolkit\\Common\\Helpers' => __DIR__ . '/../..' . '/common/Helpers.php',
         'WPMB_Toolkit\\Common\\Hooks' => __DIR__ . '/../..' . '/common/Hooks.php',
+        'WPMB_Toolkit\\Common\\Logger\\Logger' => __DIR__ . '/../..' . '/common/Logger/Logger.php',
+        'WPMB_Toolkit\\Common\\Logger\\LoggerTrait' => __DIR__ . '/../..' . '/common/Logger/LoggerTrait.php',
         'WPMB_Toolkit\\Includes\\Options\\MainOptionsPage' => __DIR__ . '/../..' . '/includes/Options/MainOptionsPage.php',
         'WPMB_Toolkit\\Includes\\Options\\OptionsValidation' => __DIR__ . '/../..' . '/includes/Options/OptionsValidation.php',
-        'WPMB_Toolkit\\Includes\\Tools\\Logger\\Logger' => __DIR__ . '/../..' . '/includes/Tools/Logger/Logger.php',
-        'WPMB_Toolkit\\Includes\\Tools\\Logger\\LoggerTrait' => __DIR__ . '/../..' . '/includes/Tools/Logger/LoggerTrait.php',
+        'WPMB_Toolkit\\Includes\\ToolsAdminPage\\ToolsAdminPage' => __DIR__ . '/../..' . '/includes/ToolsAdminPage/ToolsAdminPage.php',
+        'WPMB_Toolkit\\Includes\\ToolsAdminPage\\ToolsListTable' => __DIR__ . '/../..' . '/includes/ToolsAdminPage/ToolsListTable.php',
+        'WPMB_Toolkit\\Includes\\Tools\\ActivationFns' => __DIR__ . '/../..' . '/includes/Tools/ActivationFns.php',
+        'WPMB_Toolkit\\Includes\\Tools\\Tool' => __DIR__ . '/../..' . '/includes/Tools/Tool.php',
         'WPMB_Toolkit\\Includes\\Tools\\ToolsManager' => __DIR__ . '/../..' . '/includes/Tools/ToolsManager.php',
     );
 
