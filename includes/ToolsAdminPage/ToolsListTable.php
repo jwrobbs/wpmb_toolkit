@@ -50,9 +50,11 @@ class ToolsListTable extends \WP_List_Table {
 	 */
 	protected function get_sortable_columns() {
 		return array(
-			'name' => array( 'name', false ),
+			'name'   => array( 'name', false ),
+			'origin' => array( 'is_built_in', false ),
 		);
 	}
+
 
 	/**
 	 * Fetch data for the table
@@ -60,18 +62,35 @@ class ToolsListTable extends \WP_List_Table {
 	private function get_tools_data() {
 		$tools = ToolsManager::get_manifest();
 
+		if ( isset( $_POST['origin_filter'] ) ) { // phpcs:ignore
+			$selected_origin = sanitize_text_field( wp_unslash( $_POST['origin_filter'] ) ); // phpcs:ignore
+		}
+
 		$data = array();
 		foreach ( $tools as $tool_id => $tool ) {
+			$is_built_in = ! empty( $tool->is_built_in );
+
+			// Apply filter correctly.
+			if ( 'built-in' === $selected_origin && ! $is_built_in ) {
+				continue;
+			}
+			if ( 'user' === $selected_origin && $is_built_in ) {
+				continue;
+			}
+
 			$data[] = array(
 				'ID'          => $tool_id,
 				'name'        => $tool->name,
 				'status'      => $tool->status ?? false,
-				'is_built_in' => $tool->is_built_in ?? false, // Ensure it exists
+				'is_built_in' => $is_built_in,
 			);
 		}
 
 		return $data;
 	}
+
+
+
 
 
 	/**
@@ -83,18 +102,25 @@ class ToolsListTable extends \WP_List_Table {
 		$sortable              = $this->get_sortable_columns();
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
-		$data = $this->get_tools_data();
+		$data = $this->get_tools_data(); // Now correctly filtered!
 
 		// Sorting logic.
+		// @codingStandardsIgnoreStart
+		$orderby = sanitize_text_field( wp_unslash( $_POST['orderby'] ) ) ?? 'name';
+		$order   = sanitize_text_field( wp_unslash( $_POST['order'] ) ) ?? 'asc';
+		// @codingStandardsIgnoreEnd
 		usort(
 			$data,
-			function ( $a, $b ) {
-				return strcmp( $a['name'], $b['name'] );
+			function ( $a, $b ) use ( $orderby, $order ) {
+				$result = strcmp( (string) $a[ $orderby ], (string) $b[ $orderby ] );
+				return ( 'asc' === $order ) ? $result : -$result;
 			}
 		);
 
 		$this->items = $data;
 	}
+
+
 
 	/**
 	 * Checkbox column for bulk actions
@@ -174,5 +200,33 @@ class ToolsListTable extends \WP_List_Table {
 			'deactivate' => __( 'Deactivate', 'wpmb-toolkit' ),
 			'delete'     => __( 'Delete', 'wpmb-toolkit' ),
 		);
+	}
+
+	/**
+	 * Process bulk actions
+	 *
+	 * @param string $which The action to perform.
+	 */
+	public function extra_tablenav( $which ) {
+		if ( 'top' !== $which ) {
+			return;
+		}
+
+		$selected = $_POST['origin_filter'] ?? ''; // phpcs:ignore
+
+		echo '<form method="POST" action="">';
+		echo '<input type="hidden" name="page" value="' . esc_attr( wp_unslash( $_POST['page'] ) ?? '' ) . '">'; // phpcs:ignore
+		echo '<input type="hidden" name="origin_filter" value="' . esc_attr( $selected ) . '">';
+
+		echo '<label for="filter-by-origin" class="screen-reader-text">' . esc_html__( 'Filter by Origin', 'wpmb-toolkit' ) . '</label>';
+		echo '<select name="origin_filter" id="filter-by-origin">';
+		echo '<option value="" ' . selected( $selected, '', false ) . '>' . esc_html__( 'All Origins', 'wpmb-toolkit' ) . '</option>';
+		echo '<option value="built-in" ' . selected( $selected, 'built-in', false ) . '>' . esc_html__( 'Built-in', 'wpmb-toolkit' ) . '</option>';
+		echo '<option value="user" ' . selected( $selected, 'user', false ) . '>' . esc_html__( 'User', 'wpmb-toolkit' ) . '</option>';
+		echo '</select>';
+
+		submit_button( __( 'Filter', 'wpmb-toolkit' ), '', 'filter_action', false );
+
+		echo '</form>';
 	}
 }
