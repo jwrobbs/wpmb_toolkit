@@ -34,6 +34,7 @@ class ComposerStaticInit24e41bbaee1332276f826502c7093d78
         'WPMB_Toolkit\\Common\\Logger\\LoggerTrait' => __DIR__ . '/../..' . '/common/Logger/LoggerTrait.php',
         'WPMB_Toolkit\\Includes\\Options\\MainOptionsPage' => __DIR__ . '/../..' . '/includes/Options/MainOptionsPage.php',
         'WPMB_Toolkit\\Includes\\Options\\OptionsValidation' => __DIR__ . '/../..' . '/includes/Options/OptionsValidation.php',
+        'WPMB_Toolkit\\Includes\\ToolsAdminPage\\ToolActions' => __DIR__ . '/../..' . '/includes/ToolsAdminPage/ToolActions.php',
         'WPMB_Toolkit\\Includes\\ToolsAdminPage\\ToolsAdminPage' => __DIR__ . '/../..' . '/includes/ToolsAdminPage/ToolsAdminPage.php',
         'WPMB_Toolkit\\Includes\\ToolsAdminPage\\ToolsListTable' => __DIR__ . '/../..' . '/includes/ToolsAdminPage/ToolsListTable.php',
         'WPMB_Toolkit\\Includes\\Tools\\ActivationFns' => __DIR__ . '/../..' . '/includes/Tools/ActivationFns.php',

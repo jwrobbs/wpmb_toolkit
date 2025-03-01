@@ -1,0 +1,8 @@
+{
+	"name": "Fake Tool 2",
+	"key": "faketool2",
+	"version": "0.1",
+	"description": "A framework for creating options pages.",
+	"dependencies": [],
+	"link": "testlink2.com"
+}

@@ -34,3 +34,9 @@ The only exception is the logging function. Logging is an essential part of my d
 ## Testing
 
 There are currently no tests.
+
+## To Do
+
+- Tool activations: why do I have the data in the tool and in an array?
+  - Is there a benefit to this?
+  - If not, pick 1 method and refactor to it.

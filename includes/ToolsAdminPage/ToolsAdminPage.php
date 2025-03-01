@@ -7,6 +7,9 @@
 
 namespace WPMB_Toolkit\Includes\ToolsAdminPage;
 
+use WPMB_Toolkit\Common\Helpers;
+use WPMB_Toolkit\Includes\Tools\ToolsManager;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -21,6 +24,7 @@ class ToolsAdminPage {
 	 */
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'register_menu' ) );
+		add_action( 'admin_init', array( 'WPMB_Toolkit\Includes\ToolsAdminPage\ToolActions', 'route' ) );
 	}
 
 	/**
@@ -59,5 +63,9 @@ class ToolsAdminPage {
 			</form>
 		</div>
 		<?php
+		$activated_tools = ToolsManager::get_activated_tools();
+		Helpers::dumpit( $activated_tools );
+		$option_data = get_option( 'wpmb_toolkit_activations' );
+		Helpers::dumpit( $option_data );
 	}
 }

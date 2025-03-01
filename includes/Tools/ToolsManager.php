@@ -7,6 +7,7 @@
 
 namespace WPMB_Toolkit\Includes\Tools;
 
+use WPMB_Toolkit\Common\Helpers;
 use WPMB_Toolkit\WPMBToolkit;
 
 defined( 'ABSPATH' ) || exit;
@@ -102,6 +103,18 @@ class ToolsManager {
 	 */
 	protected static function load_activations() {
 		self::$activated_tools = \get_option( 'wpmb_toolkit_activations', array() );
+	}
+
+	/**
+	 * Get the activated tools list.
+	 *
+	 * @return array;
+	 */
+	public static function get_activated_tools() {
+		if ( empty( self::$activated_tools ) ) {
+			self::load_activations();
+		}
+		return self::$activated_tools;
 	}
 
 	/**
@@ -302,5 +315,68 @@ class ToolsManager {
 	 */
 	public static function get_manifest() {
 		return self::$manifest;
+	}
+
+	/**
+	 * Activate a tool.
+	 *
+	 * @param string $key Tool key.
+	 */
+	public static function activate_tool( $key ) {
+		if ( ! isset( self::$manifest[ $key ] ) ) {
+			return 'Tool not found';
+		}
+		if ( self::$manifest[ $key ]->active ) {
+			return 'Tool already active';
+		}
+
+		self::$manifest[ $key ]->active = true;
+
+		$activation   = self::$activated_tools;
+		$activation[] = $key;
+		\update_option( 'wpmb_toolkit_activations', $activation );
+
+		self::load_activations();
+
+		return 'Tool activated';
+	}
+	/**
+	 * Deactivate a tool.
+	 *
+	 * @param string $key Tool key.
+	 */
+	public static function deactivate_tool( $key ) {
+		if ( ! isset( self::$manifest[ $key ] ) ) {
+			return 'Tool not found';
+		}
+		if ( ! self::$manifest[ $key ]->active ) {
+			return 'Tool already inactive';
+		}
+
+		self::$manifest[ $key ]->active = false;
+
+		$activation = self::$activated_tools;
+		// Remove the key from the activations array.
+		$activation = array_diff( $activation, array( $key ) );
+		\update_option( 'wpmb_toolkit_activations', $activation );
+
+		self::load_activations();
+
+		return 'Tool activated';
+	}
+	/**
+	 * Delete a tool.
+	 *
+	 * @param string $key Tool key.
+	 */
+	public static function delete_tool( $key ) {
+		if ( ! isset( self::$manifest[ $key ] ) ) {
+			return 'Tool not found';
+		}
+		if ( self::$manifest[ $key ]['active'] ) {
+			return 'Tool must be deactivated before deletion';
+		}
+		$filesystem = Helpers::init_filesystem();
+		$filesystem->delete( self::$manifest[ $key ]['path'], true );
 	}
 }

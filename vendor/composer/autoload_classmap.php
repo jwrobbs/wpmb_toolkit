@@ -14,6 +14,7 @@ return array(
     'WPMB_Toolkit\\Common\\Logger\\LoggerTrait' => $baseDir . '/common/Logger/LoggerTrait.php',
     'WPMB_Toolkit\\Includes\\Options\\MainOptionsPage' => $baseDir . '/includes/Options/MainOptionsPage.php',
     'WPMB_Toolkit\\Includes\\Options\\OptionsValidation' => $baseDir . '/includes/Options/OptionsValidation.php',
+    'WPMB_Toolkit\\Includes\\ToolsAdminPage\\ToolActions' => $baseDir . '/includes/ToolsAdminPage/ToolActions.php',
     'WPMB_Toolkit\\Includes\\ToolsAdminPage\\ToolsAdminPage' => $baseDir . '/includes/ToolsAdminPage/ToolsAdminPage.php',
     'WPMB_Toolkit\\Includes\\ToolsAdminPage\\ToolsListTable' => $baseDir . '/includes/ToolsAdminPage/ToolsListTable.php',
     'WPMB_Toolkit\\Includes\\Tools\\ActivationFns' => $baseDir . '/includes/Tools/ActivationFns.php',
