@@ -40,3 +40,4 @@ There are currently no tests.
 - Tool activations: why do I have the data in the tool and in an array?
   - Is there a benefit to this?
   - If not, pick 1 method and refactor to it.
+- - The admin messages aren't showing. It's such a low priority that I'm not going worry about it. (Tool Manager)

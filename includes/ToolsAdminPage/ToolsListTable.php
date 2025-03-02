@@ -92,6 +92,8 @@ class ToolsListTable extends \WP_List_Table {
 				'status'      => $status,
 				'is_built_in' => $is_built_in,
 				'link'        => $tool->link,
+				'version'     => $tool->version,
+				'description' => $tool->description,
 			);
 		}
 
@@ -155,9 +157,18 @@ class ToolsListTable extends \WP_List_Table {
 	protected function column_default( $item, $column_name ) {
 		switch ( $column_name ) {
 			case 'name':
-				$name    = esc_html( $item['name'] );
+				$name = esc_html( $item['name'] );
+
+				if ( ! empty( $item['description'] ) ) {
+					$name .= '     <small>' . esc_html( $item['description'] ) . '</small>';
+				}
+
+				// Add version if it exists.
+				$version = ! empty( $item['version'] ) ? '<br><small>' . sprintf( __( 'Version: %s', 'wpmb-toolkit' ), esc_html( $item['version'] ) ) . '</small>' : ''; // phpcs:ignore
+
 				$actions = $this->get_row_actions( $item );
-				return sprintf( '%s %s', $name, $actions );
+
+				return sprintf( '%s %s %s', $name, $version, $actions );
 			case 'status':
 				return esc_html( $item['status'] );
 			case 'origin':
@@ -241,8 +252,8 @@ class ToolsListTable extends \WP_List_Table {
 			return;
 		}
 
-    $selected_origin = esc_attr( wp_unslash( $_GET['origin_filter'] ?? '' ) ); // phpcs:ignore
-    $selected_status = esc_attr( wp_unslash( $_GET['status_filter'] ?? '' ) ); // phpcs:ignore
+		$selected_origin = esc_attr( wp_unslash( $_GET['origin_filter'] ?? '' ) ); // phpcs:ignore
+		$selected_status = esc_attr( wp_unslash( $_GET['status_filter'] ?? '' ) ); // phpcs:ignore
 
 		echo '<form method="GET" action="">';
 		echo '<input type="hidden" name="page" value="' . esc_attr( wp_unslash( $_GET['page'] ?? '' ) ) . '">'; // phpcs:ignore
