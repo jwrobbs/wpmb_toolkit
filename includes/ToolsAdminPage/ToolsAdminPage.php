@@ -63,9 +63,5 @@ class ToolsAdminPage {
 			</form>
 		</div>
 		<?php
-		$activated_tools = ToolsManager::get_activated_tools();
-		Helpers::dumpit( $activated_tools );
-		$option_data = get_option( 'wpmb_toolkit_activations' );
-		Helpers::dumpit( $option_data );
 	}
 }
